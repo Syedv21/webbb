@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Tejaswini ✨</title>
+    <style>
+        /* Pure High-Graphics Black Background Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000000; /* Pure black backdrop */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #fountainCanvas { 
+           position: absolute; 
+           top: 0; 
+           left: 0; 
+           width: 100%; 
+           height: 100%; 
+           z-index: 3; 
+           pointer-events: none; 
+        }
+        #leafCanvas { 
+           position: absolute; 
+           top: 0; 
+           left: 0; 
+           width: 100%; 
+           height: 100%; 
+           z-index: 2; /* Sits behind the card but in front of stars */
+           pointer-events: none; 
+        }
+        
+        /* Fullscreen Canvas */
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* Elegant Typography Overlays */
+        .overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 50px 20px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .hint-top {
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 13px;
+            font-weight: 400;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            transition: opacity 0.5s ease;
+        }
+
+        .hint-bottom {
+            color: #ff8fa3;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            text-align: center;
+            text-shadow: 0 0 15px rgba(255, 143, 163, 0.4);
+            animation: pulseGlow 2s infinite ease-in-out;
+            transition: opacity 0.5s ease;
+        }
+
+        /* GRAND INTRO ANIMATION */
+        .intro-title {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.85);
+            width: 90%;
+            text-align: center;
+            color: #ffffff;
+            font-size: 32px;
+            font-weight: 300;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            z-index: 5;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 1.5s ease, transform 1.5s ease, visibility 1.5s;
+            text-shadow: 0 0 20px rgba(255, 77, 109, 0.8), 0 0 40px rgba(255, 77, 109, 0.4);
+        }
+
+        .intro-title.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* Central Stage Wrapper */
+        .card-stage-wrapper {
+            position: absolute;
+            top: 48%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 440px;
+            height: auto;
+            z-index: 10;
+        }
+
+        /* Glassmorphism Question Box Container */
+        .card-container {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-radius: 24px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+            position: relative;
+            z-index: 12; 
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.9);
+            transition: opacity 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                        transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                        visibility 0.8s;
+        }
+
+        .card-container.reveal {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+
+        .step-counter {
+            display: inline-block;
+            font-size: 11px;
+            color: #ff758f;
+            background: rgba(255, 117, 143, 0.15);
+            padding: 4px 12px;
+            border-radius: 20px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .question-text {
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            margin-bottom: 35px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.2);
+            line-height: 1.6;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            position: relative;
+        }
+
+        .btn {
+            padding: 12px 35px;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            border-radius: 50px;
+            cursor: pointer;
+            border: none;
+            transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+            outline: none;
+        }
+
+        .btn-yes {
+            background: linear-gradient(45deg, #ff4d6d, #ff8fa3);
+            color: white;
+            box-shadow: 0 0 15px rgba(255, 77, 109, 0.4);
+            z-index: 15;
+        }
+
+        .btn-yes:hover {
+            box-shadow: 0 0 25px rgba(255, 77, 109, 0.8);
+            transform: scale(1.05);
+        }
+
+        .btn-no {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 16;
+        }
+
+        .btn-no.runaway {
+            position: fixed;
+            transition: left 0.12s ease-out, top 0.12s ease-out;
+            box-shadow: 0 0 20px rgba(255, 77, 109, 0.3);
+            background: #11081c;
+            border: 1px solid #ff4d6d;
+            z-index: 999;
+        }
+
+        /* Final Success Celebration Stage Layout */
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000000; 
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1.2s ease, visibility 1.2s ease; 
+        }
+
+        .success-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .success-title {
+            color: #fff;
+            font-size: 34px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            text-shadow: 0 0 25px #ff4d6d;
+            margin-bottom: 20px;
+            font-weight: 300;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .success-subtitle {
+            color: #ff8fa3;
+            font-size: 16px;
+            letter-spacing: 2px;
+            text-align: center;
+            padding: 0 20px;
+            line-height: 1.6;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.5; transform: scale(0.97); }
+            50% { opacity: 1; transform: scale(1.02); }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bgAudio" src="song.mp3" loop></audio>
+
+    <canvas id="graphicsCanvas"></canvas>
+    <canvas id="fountainCanvas"></canvas>
+    <canvas id="leafCanvas"></canvas>
+
+    <div class="overlay" id="uiOverlay">
+        <div class="hint-top" id="topHint">Move your cursor to feel the sparks...</div>
+        <div class="hint-bottom" id="bottomHint">Click me if you're ready to see them fly</div>
+    </div>
+
+    <div class="intro-title" id="introTitle">Hey Tejaswini<br>My Girl ✨</div>
+
+    <div class="card-stage-wrapper">
+        
+        <div class="card-container" id="card">
+            <div class="step-counter" id="stepIndicator">Question 1/7</div>
+            <div class="question-text" id="questionText">Loading space dust...</div>
+            <div class="btn-wrapper" id="btnWrapper">
+                <button class="btn btn-yes" id="btnYes">YES</button>
+                <button class="btn btn-no" id="btnNo">NO</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="success-overlay" id="successScreen">
+        <div class="success-title">Yay! It's an Official Date! ❤️</div>
+        <div class="success-subtitle">I knew you couldn't run away from me forever, Tejaswini.<br>Check your phone, planning our celebration right now!</div>
+    </div>
+
+    <script>
+        const audio = document.getElementById('bgAudio');
+        const canvas = document.getElementById('graphicsCanvas');
+        const ctx = canvas.getContext('2d');
+        const cardEl = document.getElementById('card');
+        const topHint = document.getElementById('topHint');
+        const bottomHint = document.getElementById('bottomHint');
+        const introTitleEl = document.getElementById('introTitle');
+        const btnYes = document.getElementById('btnYes');
+        const btnNo = document.getElementById('btnNo');
+        const questionTextEl = document.getElementById('questionText');
+        const stepIndicatorEl = document.getElementById('stepIndicator');
+        const successScreen = document.getElementById('successScreen');
+
+        // --- Journey Configuration Track ---
+        const questionsList = [
+            "You know you're easily my absolute favorite person to talk to, right? 😊",
+            "Do you ever notice how the vibe completely brightens up whenever you walk into the room? ✨",
+            "They say having you as a friend is a blessing... but what if I want a little bit more than just that? 🫣",
+            "If I told you that your beautiful smile occupies about 90% of my thoughts daily, how would you react? 💭",
+            "Honestly, I value what we have so much, but I can't help wanting to hold your hand. Do you feel that tiny spark too? ⚡",
+            "If I confidently asked you out on an unforgettable romantic date right now, would your answer be 'YES'? 😏",
+            "Final Question: Will you officially go out on a cozy coffee date with me this weekend? (No is disabled!) ☕❤️"
+        ];
+        
+        let currentQuestionIndex = 0;
+        let particles = [];
+        let blastParticles = []; 
+        let heartPoints = [];
+        let isHeartMode = false;
+        let setupComplete = false;
+        let introAnimationActive = false;
+        const mouse = { x: null, y: null, lastX: null, lastY: null };
+
+        function resize() {
+            const scale = window.devicePixelRatio || 1;
+            canvas.width = window.innerWidth * scale;
+            canvas.height = window.innerHeight * scale;
+            ctx.scale(scale, scale);
+            precalculateHeart(); 
+        }
+        window.addEventListener('resize', resize);
+
+        function precalculateHeart() {
+            heartPoints = [];
+            const totalPoints = 380; 
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const scaleFactor = Math.min(width, height) * 0.024; 
+
+            for (let i = 0; i < totalPoints; i++) {
+                const t = (i / totalPoints) * Math.PI * 2;
+                const x = 16 * Math.pow(Math.sin(t), 3);
+                const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+                
+                heartPoints.push({
+                    x: x * scaleFactor + (width / 2),
+                    y: y * scaleFactor + (height / 2)
+                });
+            }
+        }
+
+        class Particle {
+            constructor(x, y, target = null) {
+                this.x = x;
+                this.y = y;
+                this.target = target;
+                
+                const colors = ['#ff4d6d', '#ff758f', '#ff8fa3', '#c77dff', '#00f5d4'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                
+                this.size = Math.random() * 2 + 1.2;
+                this.alpha = 1;
+                
+                this.vx = (Math.random() - 0.5) * 7;
+                this.vy = (Math.random() - 0.5) * 7;
+                this.friction = 0.96;
+                this.morphSpeed = 0.055; 
+            }
+
+            update() {
+                if (isHeartMode && this.target) {
+                    this.x += (this.target.x - this.x) * this.morphSpeed;
+                    this.y += (this.target.y - this.y) * this.morphSpeed;
+                    this.alpha = 0.95;
+                } else {
+                    this.vx *= this.friction;
+                    this.vy *= this.friction;
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.alpha -= 0.0075;
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.shadowBlur = 14;
+                ctx.shadowColor = this.color;
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        class BlastParticle {
+            constructor(x, y, color = null, power = 1) {
+                this.x = x;
+                this.y = y;
+                
+                const colors = ['#ff0055', '#ff5080', '#00ffcc', '#ffcc00', '#ff00ff', '#ffffff'];
+                this.color = color || colors[Math.floor(Math.random() * colors.length)];
+                
+                this.size = Math.random() * 3 + 1.5;
+                this.alpha = 1;
+                this.decay = Math.random() * 0.015 + 0.01;
+                
+                const angle = Math.random() * Math.PI * 2;
+                const speed = (Math.random() * 8 + 3) * power;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.gravity = 0.12;
+                this.friction = 0.97;
+            }
+
+            update() {
+                this.vx *= this.friction;
+                this.vy *= this.friction;
+                this.vy += this.gravity; 
+                this.x += this.vx;
+                this.y += this.vy;
+                this.alpha -= this.decay;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = this.color;
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        resize();
+        updateQuestionDOM();
+
+        function updateQuestionDOM() {
+            stepIndicatorEl.innerText = `Question ${currentQuestionIndex + 1}/7`;
+            questionTextEl.innerText = questionsList[currentQuestionIndex];
+        }
+
+        function createBlast(x, y, count = 60, power = 1) {
+            for(let i=0; i<count; i++) {
+                blastParticles.push(new BlastParticle(x, y, null, power));
+            }
+        }
+
+        function createScreenFinalFireworks() {
+            let fireworkInterval = setInterval(() => {
+                const randomX = Math.random() * window.innerWidth;
+                const randomY = Math.random() * (window.innerHeight * 0.6); 
+                createBlast(randomX, randomY, 80, 1.4);
+            }, 250);
+
+            setTimeout(() => { clearInterval(fireworkInterval); }, 2500);
+        }
+
+        // --- Interaction Event Listeners ---
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+
+            if (mouse.lastX !== null && !isHeartMode) {
+                const travelDistance = Math.hypot(mouse.x - mouse.lastX, mouse.y - mouse.lastY);
+                if (travelDistance > 1.5) {
+                    for (let i = 0; i < 3; i++) {
+                        particles.push(new Particle(mouse.x, mouse.y));
+                    }
+                }
+            }
+            mouse.lastX = mouse.x;
+            mouse.lastY = mouse.y;
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            if(isHeartMode) return;
+            mouse.x = e.touches[0].clientX;
+            mouse.y = e.touches[0].clientY;
+            for (let i = 0; i < 2; i++) {
+                particles.push(new Particle(mouse.x, mouse.y));
+            }
+        });
+
+        window.addEventListener('click', (e) => {
+            if(e.target.tagName === 'BUTTON' || cardEl.contains(e.target) || setupComplete || introAnimationActive) return;
+
+            // --- AUDIO PLAY TRIGGER ---
+            audio.play().catch(err => console.log("Audio play blocked until first interaction."));
+
+            isHeartMode = true;
+            introAnimationActive = true;
+
+            topHint.style.opacity = '0';
+            bottomHint.style.opacity = '0';
+
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+            particles.length = 0; 
+            heartPoints.forEach((point) => {
+                const radius = Math.max(window.innerWidth, window.innerHeight);
+                const angle = Math.random() * Math.PI * 2;
+                const spawnX = point.x + Math.cos(angle) * radius * 0.6;
+                const spawnY = point.y + Math.sin(angle) * radius * 0.6;
+                particles.push(new Particle(spawnX, spawnY, point));
+            });
+
+            setTimeout(() => {
+                introTitleEl.classList.add('show');
+            }, 400);
+
+            setTimeout(() => {
+                introTitleEl.classList.remove('show');
+                setTimeout(() => {
+                    cardEl.classList.add('reveal');
+                }, 1000);
+            }, 3200);
+        });
+
+        // --- Question Mechanics ---
+        function handleNextStep() {
+            if (currentQuestionIndex < questionsList.length - 1) {
+                currentQuestionIndex++;
+                updateQuestionDOM();
+            }
+        }
+
+        function runawayNoButton() {
+            if (currentQuestionIndex === 6) { 
+                btnNo.classList.add('runaway');
+                
+                const maxX = window.innerWidth - btnNo.offsetWidth - 30;
+                const maxY = window.innerHeight - btnNo.offsetHeight - 30; 
+                
+                const randomX = Math.max(30, Math.floor(Math.random() * maxX));
+                const randomY = Math.max(30, Math.floor(Math.random() * maxY));
+                
+                btnNo.style.left = `${randomX}px`;
+                btnNo.style.top = `${randomY}px`;
+            }
+        }
+
+        btnNo.addEventListener('mouseenter', runawayNoButton);
+        btnNo.addEventListener('click', (e) => {
+            if (currentQuestionIndex === 6) {
+                e.stopPropagation();
+                runawayNoButton();
+            } else {
+                handleNextStep();
+            }
+        });
+        btnNo.addEventListener('touchstart', (e) => {
+            e.preventDefault(); 
+            e.stopPropagation();
+            runawayNoButton();
+        });
+
+        btnYes.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            const rect = btnYes.getBoundingClientRect();
+            const clickX = rect.left + rect.width / 2;
+            const clickY = rect.top + rect.height / 2;
+
+            if (currentQuestionIndex === 6) {
+                setupComplete = true;
+                cardEl.classList.remove('reveal');
+                
+                createBlast(window.innerWidth / 2, window.innerHeight / 2, 150, 2.0);
+                createScreenFinalFireworks();
+
+                setTimeout(() => {
+                    successScreen.classList.add('show');
+                }, 500);
+            } else {
+                createBlast(clickX, clickY, 45, 0.8);
+                setTimeout(() => {
+                    handleNextStep();
+                }, 200);
+            }
+        });
+
+        function renderLoop() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.09)';
+            ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+            if (Math.random() < 0.18 && !isHeartMode && particles.length < 350) {
+                particles.push(new Particle(Math.random() * window.innerWidth, Math.random() * window.innerHeight));
+            }
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.update();
+                p.draw();
+
+                if (!isHeartMode && p.alpha <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+
+            for (let j = blastParticles.length - 1; j >= 0; j--) {
+                const bp = blastParticles[j];
+                bp.update();
+                bp.draw();
+
+                if (bp.alpha <= 0) {
+                    blastParticles.splice(j, 1);
+                }
+            }
+
+            requestAnimationFrame(renderLoop);
+        }
+        renderLoop();
+        // 1. Setup the Fountain Canvas
+const fCanvas = document.getElementById('fountainCanvas');
+const fCtx = fCanvas.getContext('2d');
+let hearts = [];
+
+// 2. Heart Particle Class
+class Heart {
+    constructor(x) { 
+        this.x = x; 
+        this.y = window.innerHeight; 
+        this.vx = (Math.random() - 0.5) * 4; 
+        this.vy = -Math.random() * 10 - 5; 
+        this.alpha = 1; 
+    }
+    update() { this.x += this.vx; this.y += this.vy; this.vy += 0.2; this.alpha -= 0.008; }
+    draw() { 
+        fCtx.fillStyle = `rgba(255, 77, 109, ${this.alpha})`; 
+        fCtx.beginPath(); 
+        fCtx.arc(this.x, this.y, 6, 0, Math.PI * 2); 
+        fCtx.fill(); 
+    }
+}
+
+// 3. The Fountain Animation Loop
+function animateFountains() {
+    fCtx.clearRect(0, 0, fCanvas.width, fCanvas.height);
+    // Spawn hearts from left (50px) and right (width - 50px)
+    if(Math.random() < 0.2) {
+        hearts.push(new Heart(50));
+        hearts.push(new Heart(window.innerWidth - 50));
+    }
+    hearts.forEach((h, i) => { 
+        h.update(); 
+        h.draw(); 
+        if(h.alpha <= 0) hearts.splice(i, 1); 
+    });
+    requestAnimationFrame(animateFountains);
+}
+animateFountains();
+    const lCanvas = document.getElementById('leafCanvas');
+const lCtx = lCanvas.getContext('2d');
+let leaves = [];
+
+class Leaf {
+    constructor() {
+        this.x = Math.random() * window.innerWidth;
+        this.y = -20;
+        this.size = Math.random() * 15 + 10;
+        this.speed = Math.random() * 1.5 + 0.5;
+        this.angle = Math.random() * Math.PI * 2;
+        this.rotation = Math.random() * 0.05 - 0.025;
+        this.color = ['#ff4d6d', '#ffb703', '#fb8500', '#ae2012'][Math.floor(Math.random() * 4)];
+    }
+    update() {
+        this.y += this.speed;
+        this.x += Math.sin(this.angle) * 2;
+        this.angle += 0.02;
+        this.size += this.rotation;
+    }
+    draw() {
+        lCtx.fillStyle = this.color;
+        lCtx.beginPath();
+        // Drawing a simplified leaf shape
+        lCtx.moveTo(this.x, this.y);
+        lCtx.bezierCurveTo(this.x+this.size, this.y-this.size, this.x+this.size*2, this.y+this.size, this.x, this.y+this.size*2);
+        lCtx.bezierCurveTo(this.x-this.size*2, this.y+this.size, this.x-this.size, this.y-this.size, this.x, this.y);
+        lCtx.fill();
+    }
+}
+
+function animateLeaves() {
+    lCtx.clearRect(0, 0, lCanvas.width, lCanvas.height);
+    if(Math.random() < 0.1) leaves.push(new Leaf());
+    leaves.forEach((l, i) => {
+        l.update(); l.draw();
+        if(l.y > window.innerHeight) leaves.splice(i, 1);
+    });
+    requestAnimationFrame(animateLeaves);
+}
+animateLeaves();
+    </script>
+</body>
+</html>
